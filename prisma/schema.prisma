@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int    @id @default(autoincrement())
+  firstName   String @db.VarChar(255)
+  lastName    String @db.VarChar(255)
+  username    String @db.VarChar(255)
+  password    String @db.VarChar(255)
+  birthDate   String @db.VarChar(255)
+  phoneNumber String @unique @db.VarChar(255)
+}
+
+model Book {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(255)
+  category  String   @db.VarChar(255)
+  image     String   @db.VarChar(255)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  copies    BookCopy[]  // ความสัมพันธ์ไปยังเล่มจริง
+}
+
+model BookCopy {
+  id        Int       @id @default(autoincrement())
+  bookId    Int
+  status    CopyStatus @default(AVAILABLE)
+  code      String     @unique // รหัสประจำเล่ม เช่น BARCODE
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  book      Book       @relation(fields: [bookId], references: [id])
+}
+
+enum CopyStatus {
+  AVAILABLE
+  BORROWED
+  LOST
+  DAMAGED
+}
