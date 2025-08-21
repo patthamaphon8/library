@@ -126,7 +126,7 @@ const page = () => {
         <div className="mt-2 text-center">
           <button className="px-4 py-2 bg-black text-white rounded-[64px] h-[40px] cursor-pointer"
           onClick={()=>{
-            route.push("/")
+            route.push("/login")
           }}>
           Go to Sign In
           </button>

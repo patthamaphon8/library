@@ -18,7 +18,7 @@ model Admin {
   phoneNumber  String   @unique @db.VarChar(255)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @default(now())
-  isApprove    Boolean? @default(false)
+  isApprove    Boolean?
   isSuperAdmni Boolean  @default(false)
 }
 

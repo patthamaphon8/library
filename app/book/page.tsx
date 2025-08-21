@@ -5,18 +5,17 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Prisma } from "@/generated/prisma";
 import { addBook, listBook } from "@/lib/action/book";
-import { UploadButton, useUploadThing } from "@/lib/utils";
+import { useUploadThing } from "@/lib/utils";
 import { useDropzone } from "@uploadthing/react";
 import { LoaderCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { redirect, useRouter } from "next/navigation";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   generateClientDropzoneAccept,
   generatePermittedFileTypes,
@@ -24,19 +23,23 @@ import {
 
 const page = () => {
   const session = useSession()
-    if(!session?.data?.user){
-      redirect(`/login`)
-    }
+  const router = useRouter()
+    console.log("🚀 ~ page book ~ session:", session.status === "unauthenticated")
   const [isOpen, setIsOpen] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | undefined>();
   const [filePreview, setFilePreview] = useState<
     string | ArrayBuffer | null | undefined
   >();
   const [name, setName] = useState<string | undefined>();
   const [category, setCategory] = useState<string | undefined>();
-  const [bookList, setBookList] = useState<Prisma.BookGetPayload<{}>[]>([]);
+  const [bookList, setBookList] = useState<Prisma.BookGetPayload<{include: {copies: true}}>[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if(session?.status === "unauthenticated"){
+      router.push("/login")
+    }
+  }, [session.status])
 
   const onSubmit = async () => {
     setIsLoading(true);
@@ -116,11 +119,11 @@ const page = () => {
     <div className="p-4">
       <div className="bg-white rounded-2xl p-4 border border-black">
         <div className="text-xl font-bold">หนังสือ</div>
-        <div className="flex">
-          <div className="bg-[#e6e6ea] rounded-lg h-10">
+        <div className="flex gap-4 justify-between">
+          <div className="bg-[#e6e6ea] rounded-lg h-10 flex-1">
             <input
               type="text"
-              className="h-full w-full placeholder:text-[10px]"
+              className="h-full w-full placeholder:text-sm px-3"
               placeholder="ค้นหาหนังสือ...."
             />
           </div>
@@ -147,7 +150,7 @@ const page = () => {
                 <tr key={index}>
                   <td className="py-2">
                     <div className="flex gap-4 items-center">
-                      <img src={book.image} alt="bookImage" width={66} height={66} className="rounded-lg"/>
+                      <img src={book.image} alt="bookImage" width={66} height={66} className="rounded-lg drop-shadow-md bg-white"/>
                       <div className="text-left">
                         <div className=" font-bold leading-3.5">
                     {book.name}
@@ -161,7 +164,7 @@ const page = () => {
                     </div>
                     </td>
                   <td className="py-2  font-bold">{book.category}</td>
-                  <td className="py-2  font-bold">50</td>
+                  <td className="py-2  font-bold">{book.copies.length}</td>
                 </tr>
               );
             })}

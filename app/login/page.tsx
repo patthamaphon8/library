@@ -46,7 +46,7 @@ export default function Home() {
             onChange={(e) => {
               setPassword(e.target.value);
             }}
-            type="text"
+            type="password"
             className="px-4 bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
           />
         </div>

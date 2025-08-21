@@ -18,7 +18,11 @@ const addBook = async (data: Prisma.BookCreateInput) => {
 };
 const listBook = async () => {
   try {
-    const responseListBook = await prisma.book.findMany();
+    const responseListBook = await prisma.book.findMany({
+      include: {
+        copies: true,
+      }
+    });
     return responseListBook;
   } catch (error) {
     console.error(error);
