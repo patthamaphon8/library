@@ -1,38 +1,9 @@
-import DialogAddBookCopy from "@/components/DialogAddBookCopy";
-import { Button } from "@/components/ui/button";
-import { $Enums } from "@/generated/prisma";
 import { getBookById } from "@/lib/action/book";
 import { listBookCopy } from "@/lib/action/bookCopy";
-import { List, Menu, Plus, Search } from "lucide-react";
 import React from "react";
 import ManageBookCopy from "./_components/ManageBookCopy";
-
-const renderStatus = (status: $Enums.CopyStatus) => {
-  let color = "text-black";
-  let text: string = status;
-  switch (status) {
-    case "AVAILABLE":
-      text = "ว่าง";
-      color = "text-green-500";
-      break;
-    case "BORROWED":
-      text = "ไม่ว่าง";
-      color = "text-red-500";
-      break;
-    case "DAMAGED":
-      text = "เสียหาย";
-      color = "text-amber-400";
-      break;
-    case "LOST":
-      text = "สูญหาย";
-      color = "text-gray-400";
-      break;
-    default:
-      text = status;
-      break;
-  }
-  return <div className={`${color}`}>{text}</div>;
-};
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 interface BookDetailProps {
   params: Promise<{
@@ -44,10 +15,16 @@ interface BookDetailProps {
   }>;
 }
 const page = async ({ params, searchParams }: BookDetailProps) => {
+  const session = await auth();
+  if (!session?.user) {
+    redirect(`/login`);
+  }
   const { bookId } = await params;
   const { search, status } = await searchParams;
   const response = await getBookById(parseInt(bookId));
-  const responseBookCopy = await listBookCopy({});
+  const responseBookCopy = await listBookCopy({
+    bookId: parseInt(bookId),
+  });
   // console.log("🚀 ~ page ~ responseBookCopy:", responseBookCopy)
   const total = responseBookCopy?.length ?? 0;
   const borrowed =
@@ -94,8 +71,13 @@ const page = async ({ params, searchParams }: BookDetailProps) => {
           >
             หมวดหมู่: {response?.category}
           </div>
-          <ManageBookCopy bookId={bookId} />
-          <Button className={`mt-2`}>เลือก</Button>
+          <ManageBookCopy
+            bookId={bookId}
+            bookCopyList={responseBookCopy}
+            search={search}
+            status={status}
+          />
+          {/* <Button className={`mt-2`}>เลือก</Button>
           <table className="w-full">
             <thead>
               <tr>
@@ -106,11 +88,14 @@ const page = async ({ params, searchParams }: BookDetailProps) => {
             <tbody className="text-center">
               {responseBookCopy
                 ?.filter((bookCopy) => {
-                  const searchCode = search ? bookCopy.code.toLowerCase().startsWith(search) : true
-                  const searchStatus = status ? bookCopy.status === status : true
-                  return searchCode && searchStatus
-                }
-                )
+                  const searchCode = search
+                    ? bookCopy.code.toLowerCase().startsWith(search)
+                    : true;
+                  const searchStatus = status
+                    ? bookCopy.status === status
+                    : true;
+                  return searchCode && searchStatus;
+                })
                 .map((bookCopy, index) => {
                   return (
                     <tr key={`bookCopy${index}`}>
@@ -120,7 +105,7 @@ const page = async ({ params, searchParams }: BookDetailProps) => {
                   );
                 })}
             </tbody>
-          </table>
+          </table> */}
         </div>
       </div>
     </div>

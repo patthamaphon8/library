@@ -12,8 +12,10 @@ import { addBook, listBook } from "@/lib/action/book";
 import { UploadButton, useUploadThing } from "@/lib/utils";
 import { useDropzone } from "@uploadthing/react";
 import { LoaderCircle } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   generateClientDropzoneAccept,
@@ -21,6 +23,10 @@ import {
 } from "uploadthing/client";
 
 const page = () => {
+  const session = useSession()
+    if(!session?.data?.user){
+      redirect(`/login`)
+    }
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | undefined>();

@@ -1,8 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { login } from "./lib/action/user";
-import { PrismaClient } from "./generated/prisma";
-// const prisma = new PrismaClient()
+import { login } from "./lib/action/admin";
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   pages:{
     signIn: "/login",
@@ -33,7 +32,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return null
         }
        const response = await login(credential.username,credential.password)
-       if (!response) {
+       if (!response || response.isApprove === false) {
         return null
        }
         return {

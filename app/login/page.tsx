@@ -37,7 +37,7 @@ export default function Home() {
               setUsername(e.target.value);
             }}
             type="text"
-            className="bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
+            className="px-4 bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
           />
         </div>
         <div className="mt-4">
@@ -47,7 +47,7 @@ export default function Home() {
               setPassword(e.target.value);
             }}
             type="text"
-            className="bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
+            className="px-4 bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
           />
         </div>
         <button

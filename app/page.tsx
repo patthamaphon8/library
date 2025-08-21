@@ -1,25 +1,25 @@
-"use client";
-import { signOut, useSession } from "next-auth/react";
+import { listBorrowTransaction } from "@/lib/action/borrowTransaction";
 import React from "react";
+import OverView from "./_components/OverView";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-const page = () => {
-  const session = useSession()
+const page = async () => {
+  const session = await auth()
+  if(!session?.user){
+    redirect(`/login`)
+  }
+  const responseListBorrowTransaction = await listBorrowTransaction();
+
   return (
-    <div>
-      <div>
-        Home Page
+    <div className={`p-4`}>
+      <div className={`border border-black bg-white p-4 rounded-2xl`}>
+        <div className={`text-2xl font-bold`}>ประวัติการยืมหนังสือล่าสุด</div>
+        <OverView
+          className={`mt-4`}
+          borrowTransactions={responseListBorrowTransaction}
+        />
       </div>
-      <div>
-        {JSON.stringify(session.data?.user)}
-      </div>
-      <button
-        className={`bg-red-400 p-4 rounded-lg text-white cursor-pointer`}
-        onClick={() => {
-          signOut({ redirect: true, redirectTo: "/login" });
-        }}
-      >
-        logout
-      </button>
     </div>
   );
 };

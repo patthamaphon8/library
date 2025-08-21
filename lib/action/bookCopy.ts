@@ -24,15 +24,26 @@ const addBookCopy = async (data: Prisma.BookCopyCreateInput) => {
   }
 };
 
-const listBookCopy = async ({ code }: { code?: string }) => {
+const listBookCopy = async ({
+  code,
+  bookId,
+}: {
+  code?: string;
+  bookId: number;
+}) => {
   try {
-    let query = {};
+    let query: {
+      where: Prisma.BookCopyWhereInput;
+    } = {
+      where: {
+        bookId: bookId,
+      },
+    };
     if (code) {
-      query = {
-        where: {
-          code: {
-            startsWith: code,
-          },
+      query.where = {
+        ...query.where,
+        code: {
+          startsWith: code,
         },
       };
     }
@@ -47,4 +58,45 @@ const listBookCopy = async ({ code }: { code?: string }) => {
   }
 };
 
-export { addBookCopy, listBookCopy };
+const deleteBookByIds = async (ids: number[]) => {
+  try {
+    const response = await prisma.bookCopy.deleteMany({
+      where: {
+        id: {
+          in: ids,
+        }
+      }
+    })
+    return response
+  } catch (error) {
+    console.error(error);
+    if(error instanceof PrismaClientKnownRequestError){
+      return error.message
+    }
+  } finally {
+    prisma.$disconnect();
+  }
+}
+
+const getBookCopyById = async (code: string) => {
+  try {
+    const response = await prisma.bookCopy.findFirst({
+      where: {
+        code: code,
+      },
+      include: {
+        book: true,
+      },
+    })
+    return response
+  } catch (error) {
+    console.error(error);
+    if(error instanceof PrismaClientKnownRequestError){
+      return error.message
+    }
+  } finally {
+    prisma.$disconnect();
+  }
+}
+
+export { addBookCopy, listBookCopy, deleteBookByIds, getBookCopyById };

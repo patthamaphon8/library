@@ -1,4 +1,5 @@
 "use client";
+import { addAdmin } from "@/lib/action/admin";
 import { addUser } from "@/lib/action/user";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -96,7 +97,7 @@ const page = () => {
       return
     }
     console.log("สร้างUser");
-    const response = await addUser({
+    const response = await addAdmin({
       firstName,
       lastName,
       birthDate,
@@ -105,7 +106,7 @@ const page = () => {
       password,
     })
     console.log(response);
-    if(response !== undefined){
+    if(!response){
       return
     }
     setIsSuccess(true)
