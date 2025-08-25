@@ -54,10 +54,10 @@ model BookCopy {
 }
 
 enum CopyStatus {
-  AVAILABLE
-  BORROWED
-  LOST
-  DAMAGED
+  AVAILABLE //พร้อมให้ยืม
+  BORROWED //ถูกยืมอยู่
+  LOST //สูญหาย
+  DAMAGED //เสียหาย
 }
 
 model BorrowTransaction {

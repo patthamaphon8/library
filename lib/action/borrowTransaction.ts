@@ -25,8 +25,8 @@ const addBorrowTransaction = async (data: {
       },
       data: {
         status: "BORROWED",
-      }
-    })
+      },
+    });
     return response;
   } catch (error) {
     console.error(error);
@@ -36,33 +36,58 @@ const addBorrowTransaction = async (data: {
 };
 
 const listBorrowTransaction = async (
-  from?: string,
-  to?: string,
-  filterBy?: "borrowDate" | "dueDate" | string
+  // from?: string,
+  // to?: string,
+  // filterBy?: "borrowDate" | "dueDate" | string,
+  nameAndUser?: string,
+  // status?: string[]
 ) => {
   try {
-    let query: {
+    const query: {
       where: Prisma.BorrowTransactionWhereInput;
     } = {
       where: {},
     };
-    if(from && to){
-      if (filterBy === "borrowDate") {
-        query.where = {
-          borrowedAt: {
-            gte: from,
-            lte: to,
+    if (nameAndUser) {
+      query.where.OR = [
+        {
+          bookCopy: {
+            book: {
+              name: {
+                startsWith: nameAndUser,
+              },
+            },
           },
-        };
-      } else if (filterBy === "dueDate") {
-        query.where = {
-          dueDate: {
-            gte: from,
-            lte: to,
-          },
-        };
-      }
+        },
+      ];
+      query.where.OR?.push({
+        user: {
+          OR: [
+            {
+              firstName: {
+                startsWith: nameAndUser,
+              },
+            },
+            {
+              lastName: {
+                startsWith: nameAndUser,
+              },
+            },
+          ],
+        },
+      });
     }
+    // if (from && to) {
+    //   if (filterBy === "borrowDate") {
+    //     query.where.borrowedAt = {
+    //       gte: from,
+    //       lte: to,
+    //     };
+    //   } else if (filterBy === "dueDate") {
+    //     query.where.dueDate = { gte: from, lte: to };
+    //   }
+    // }
+    console.log(query);
     const response = await prisma.borrowTransaction.findMany({
       include: {
         bookCopy: {
@@ -73,7 +98,7 @@ const listBorrowTransaction = async (
         user: true,
       },
       orderBy: {
-        borrowedAt: 'desc',
+        borrowedAt: "desc",
       },
       ...query,
     });
@@ -98,22 +123,26 @@ const getBorrowTransactionByBookCopyId = async (bookCopyId: number) => {
       include: {
         user: true,
       },
-    })
-    return response
+    });
+    return response;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
-    prisma.$disconnect()
+    prisma.$disconnect();
   }
-}
+};
 
-const returnBook = async (id: number, returnedAt: string, bookCopyId: number,) => {
+const returnBook = async (
+  id: number,
+  returnedAt: string,
+  bookCopyId: number
+) => {
   try {
     console.table({
       id,
       returnedAt,
       bookCopyId,
-    })
+    });
     const response = await prisma.borrowTransaction.update({
       where: {
         id: id,
@@ -122,21 +151,26 @@ const returnBook = async (id: number, returnedAt: string, bookCopyId: number,) =
         returnedAt: returnedAt,
         status: "RETURNED",
       },
-    })
+    });
     await prisma.bookCopy.update({
       where: {
         id: bookCopyId,
       },
       data: {
         status: "AVAILABLE",
-      }
-    })
-    return response
+      },
+    });
+    return response;
   } catch (error) {
-    console.error(error)
+    console.error(error);
   } finally {
-    prisma.$disconnect()
+    prisma.$disconnect();
   }
-}
+};
 
-export { addBorrowTransaction, listBorrowTransaction, getBorrowTransactionByBookCopyId, returnBook };
+export {
+  addBorrowTransaction,
+  listBorrowTransaction,
+  getBorrowTransactionByBookCopyId,
+  returnBook,
+};

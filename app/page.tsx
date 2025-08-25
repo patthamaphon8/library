@@ -4,12 +4,23 @@ import OverView from "./_components/OverView";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
-const page = async () => {
-  const session = await auth()
-  if(!session?.user){
-    redirect(`/login`)
+interface OverViewPageProps {
+  searchParams: Promise<{
+    search?: string;
+    isLate?: string;
+    isReturnLate?: string;
+    isWaiting?: string;
+    isReturned?: string;
+  }>;
+}
+
+const page = async ({ searchParams }: OverViewPageProps) => {
+  const session = await auth();
+  if (!session?.user) {
+    redirect(`/login`);
   }
-  const responseListBorrowTransaction = await listBorrowTransaction();
+  const { search } = await searchParams;
+  const responseListBorrowTransaction = await listBorrowTransaction(search);
 
   return (
     <div className={`p-4`}>

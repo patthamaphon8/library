@@ -1,12 +1,11 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import BarcodeScanner from "react-qr-barcode-scanner";
 import { CalendarDays, LoaderCircle, Search, X } from "lucide-react";
@@ -42,11 +41,11 @@ const DialogBorrowReturn = ({
   >();
   const [borrowDate, setBorrowDate] = useState<dayjs.Dayjs | undefined>();
   const [dueDate, setDueDate] = useState<dayjs.Dayjs | undefined>();
-  const [user, setUser] = useState<Prisma.UserGetPayload<{}> | undefined>();
+  const [user, setUser] = useState<Prisma.UserGetPayload<object> | undefined>();
   const [searchUserText, setSearchUserText] = useState<string>("");
-  const [userList, setUserList] = useState<Prisma.UserGetPayload<{}>[]>([]);
+  const [userList, setUserList] = useState<Prisma.UserGetPayload<object>[]>([]);
   const [borrowTransaction, setBorrowTransaction] = useState<
-    Prisma.BorrowTransactionGetPayload<{}> | undefined
+    Prisma.BorrowTransactionGetPayload<object> | undefined
   >();
 
   const handleOnOpenChange = (open: boolean) => {
@@ -358,9 +357,10 @@ const DialogBorrowReturn = ({
               )}
               {userList.length > 0 && (
                 <div className={`h-[200px] flex flex-col gap-1 mt-2`}>
-                  {userList.map((user) => {
+                  {userList.map((user, index) => {
                     return (
                       <button
+                        key={`user${index}`}
                         className={`odd:bg-gray-50 even:bg-gray-100 hover:bg-gray-300 cursor-pointer disabled:cursor-default py-2 px-1 rounded-lg`}
                         onClick={() => {
                           setUser(user);

@@ -32,7 +32,7 @@ const listBookCopy = async ({
   bookId: number;
 }) => {
   try {
-    let query: {
+    const query: {
       where: Prisma.BookCopyWhereInput;
     } = {
       where: {

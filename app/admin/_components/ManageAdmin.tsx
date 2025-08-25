@@ -1,9 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { Prisma } from "@/generated/prisma";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
-import { Check, MoreHorizontal, Plus, Search, X } from "lucide-react";
+import { Check, MoreHorizontal, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import {
@@ -19,7 +18,7 @@ import { approveAdmin, rejectAdmin } from "@/lib/action/admin";
 
 interface ManageAdminProps {
   className?: string;
-  adminLish?: Prisma.AdminGetPayload<{}>[];
+  adminLish?: Prisma.AdminGetPayload<object>[];
 }
 
 const renderStatus = (isApprove?: boolean | null) => {
@@ -56,7 +55,7 @@ const ManageAdmin = ({ className, adminLish }: ManageAdminProps) => {
     }, 500);
 
     return () => clearTimeout(delayDebounce); // ล้าง timeout ถ้าพิมพ์ต่อ
-  }, [searchText, router]);
+  }, [searchText, router, searchParams]);
 
   const handleOnCancelApprove = () => {
     setIsOpenApprove(false);
@@ -167,8 +166,6 @@ const ManageAdmin = ({ className, adminLish }: ManageAdminProps) => {
                       <MoreHorizontal />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      {/* <DropdownMenuLabel>My Account</DropdownMenuLabel> */}
-                      {/* <DropdownMenuSeparator /> */}
                       <DropdownMenuItem
                         onClick={() => {
                           setSelectedAdmin(admin.id)

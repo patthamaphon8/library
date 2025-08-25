@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import dayjs from "dayjs";
 
 interface ManageUserProps {
-  userList?: Prisma.UserGetPayload<{}>[];
+  userList?: Prisma.UserGetPayload<object>[];
   className?: string;
 }
 

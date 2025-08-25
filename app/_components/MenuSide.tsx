@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { ArrowUpDown, Book, LogOut, UserCircle2, UserLock, Users2 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { redirect, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React from "react";
 
 const MenuSide = () => {

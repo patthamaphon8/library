@@ -12,7 +12,7 @@ const login = async (email: string, password: string) => {
         password: password,
       },
     });
-    console.log("admin.ts", responseLogin);
+    // console.log("admin.ts", responseLogin);
     return responseLogin;
   } catch (error) {
     console.error(error);

@@ -28,45 +28,49 @@ export default function Home() {
         className="absolute top-0 left-0 bg-red-50"
         alt="logo"
       />
-      <div className="bg-white flex flex-col items-center">
-        <div className="text-xl font-bold text-center">Sign In</div>
-        <div>
-          <div>Username</div>
-          <input
-            onChange={(e) => {
-              setUsername(e.target.value);
+      <form action={onSubmit}>
+        <div className="bg-white flex flex-col items-center">
+          <div className="text-xl font-bold text-center">Sign In</div>
+          <div>
+            <div>Username</div>
+            <input
+              onChange={(e) => {
+                setUsername(e.target.value);
+              }}
+              type="text"
+              className="px-4 bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
+            />
+          </div>
+          <div className="mt-4">
+            <div>Password</div>
+            <input
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+              type="password"
+              className="px-4 bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
+            />
+          </div>
+          <button
+            type="submit"
+            onClick={() => {
+              // onSubmit();
             }}
-            type="text"
-            className="px-4 bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
-          />
-        </div>
-        <div className="mt-4">
-          <div>Password</div>
-          <input
-            onChange={(e) => {
-              setPassword(e.target.value);
+            className="bg-black cursor-pointer text-white w-[420px] h-[48px] rounded-[50px] text-base mt-6"
+          >
+            Sign In
+          </button>
+          <button
+            type="button"
+            className="bg-[#F7E3AF] cursor-pointer text-black w-[420px] h-[48px] rounded-[50px] text-base mt-6"
+            onClick={() => {
+              route.push("/register");
             }}
-            type="password"
-            className="px-4 bg-[#D8DFE5] w-[462px] h-[60px] rounded-[15px]"
-          />
+          >
+            Register
+          </button>
         </div>
-        <button
-          onClick={() => {
-            onSubmit();
-          }}
-          className="bg-black cursor-pointer text-white w-[420px] h-[48px] rounded-[50px] text-base mt-6"
-        >
-          Sign In
-        </button>
-        <button
-          className="bg-[#F7E3AF] cursor-pointer text-black w-[420px] h-[48px] rounded-[50px] text-base mt-6"
-          onClick={() => {
-            route.push("/register");
-          }}
-        >
-          Register
-        </button>
-      </div>
+      </form>
     </div>
   );
 }

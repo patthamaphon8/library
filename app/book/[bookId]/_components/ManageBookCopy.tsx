@@ -40,7 +40,7 @@ const renderStatus = (status: $Enums.CopyStatus) => {
 
 interface ManageBookCopyProps {
   bookId: string;
-  bookCopyList?: Prisma.BookCopyGetPayload<{}>[];
+  bookCopyList?: Prisma.BookCopyGetPayload<object>[];
   search?: string;
   status?: string;
 }
@@ -71,7 +71,7 @@ const ManageBookCopy = ({
     }, 1500); // 2 วิ
 
     return () => clearTimeout(delayDebounce); // ล้าง timeout ถ้าพิมพ์ต่อ
-  }, [searchCode, router]);
+  }, [searchCode, router, bookId, searchParams]);
 
   const handleOnChangeFilterStatus = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -167,7 +167,7 @@ const ManageBookCopy = ({
               <th>
                 <Checkbox
                   checked={selectedRows.length === bookCopyList?.length}
-                  onCheckedChange={(checked) => {
+                  onCheckedChange={() => {
                     toggleAll();
                   }}
                 />
@@ -196,7 +196,7 @@ const ManageBookCopy = ({
                     <th>
                       <Checkbox
                         checked={selectedRows.includes(bookCopy.id)}
-                        onCheckedChange={(_) => {
+                        onCheckedChange={() => {
                           toggleRow(bookCopy.id);
                         }}
                       />

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import BarcodeScanner from "react-qr-barcode-scanner";
 import {
   Dialog,
@@ -27,7 +27,6 @@ const DialogAddBookCopy = ({
   bookId,
   children,
 }: DialogAddBookCopyProps) => {
-  const [data, setData] = useState("Not Found");
   const [isOpen, setIsOpen] = useState(false);
   const [isFound, setIsFound] = useState(false);
   const [codeManual, setCodeManual] = useState<string | undefined>();
@@ -106,12 +105,10 @@ const DialogAddBookCopy = ({
               videoConstraints={{
                 aspectRatio: 21 / 9,
               }}
-              onUpdate={(err, result) => {
+              onUpdate={(_, result) => {
                 if (result) {
                   setIsFound(true);
                   handleOnDetect(result.getText());
-                } else {
-                  setData("Not Found");
                 }
               }}
             />

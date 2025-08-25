@@ -77,35 +77,6 @@ const page = async ({ params, searchParams }: BookDetailProps) => {
             search={search}
             status={status}
           />
-          {/* <Button className={`mt-2`}>เลือก</Button>
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody className="text-center">
-              {responseBookCopy
-                ?.filter((bookCopy) => {
-                  const searchCode = search
-                    ? bookCopy.code.toLowerCase().startsWith(search)
-                    : true;
-                  const searchStatus = status
-                    ? bookCopy.status === status
-                    : true;
-                  return searchCode && searchStatus;
-                })
-                .map((bookCopy, index) => {
-                  return (
-                    <tr key={`bookCopy${index}`}>
-                      <td>{bookCopy.code}</td>
-                      <td>{renderStatus(bookCopy.status)}</td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table> */}
         </div>
       </div>
     </div>

@@ -10,21 +10,24 @@ import { Prisma } from "@/generated/prisma";
 import { addBook, listBook } from "@/lib/action/book";
 import { useUploadThing } from "@/lib/utils";
 import { useDropzone } from "@uploadthing/react";
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   generateClientDropzoneAccept,
   generatePermittedFileTypes,
 } from "uploadthing/client";
 
-const page = () => {
-  const session = useSession()
-  const router = useRouter()
-    console.log("🚀 ~ page book ~ session:", session.status === "unauthenticated")
+const BookPage = () => {
+  const session = useSession();
+  const router = useRouter();
+  console.log(
+    "🚀 ~ page book ~ session:",
+    session.status === "unauthenticated"
+  );
   const [isOpen, setIsOpen] = useState(false);
   const [file, setFile] = useState<File | undefined>();
   const [filePreview, setFilePreview] = useState<
@@ -32,21 +35,24 @@ const page = () => {
   >();
   const [name, setName] = useState<string | undefined>();
   const [category, setCategory] = useState<string | undefined>();
-  const [bookList, setBookList] = useState<Prisma.BookGetPayload<{include: {copies: true}}>[]>([]);
+  const [bookList, setBookList] = useState<
+    Prisma.BookGetPayload<{ include: { copies: true } }>[]
+  >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    if(session?.status === "unauthenticated"){
-      router.push("/login")
+    if (session?.status === "unauthenticated") {
+      router.push("/login");
     }
-  }, [session.status])
+  }, [session.status]);
 
   const onSubmit = async () => {
     setIsLoading(true);
     console.log("namoo");
-    if(!file){
-      alert("กรุณาใส่รูปหนังสือ")
-      return
+    if (!file) {
+      alert("กรุณาใส่รูปหนังสือ");
+      return;
     }
     if (!name) {
       alert("กรุณาใส่ชื่อหนังสือ");
@@ -56,10 +62,10 @@ const page = () => {
       alert("กรุณาใส่หมวดหมู่");
       return;
     }
-    const responseFile = await startUpload([file])
-    if(!responseFile){
-      alert(`upload image failed`)
-      return
+    const responseFile = await startUpload([file]);
+    if (!responseFile) {
+      alert(`upload image failed`);
+      return;
     }
     const response = await addBook({
       name: name,
@@ -85,7 +91,7 @@ const page = () => {
   }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    console.log(acceptedFiles)
+    console.log(acceptedFiles);
     if (acceptedFiles.length > 0) {
       setFile(acceptedFiles[0]);
       const reader = new FileReader();
@@ -96,7 +102,7 @@ const page = () => {
     }
   }, []);
 
-   const { startUpload, routeConfig } = useUploadThing("imageUploader", {
+  const { startUpload, routeConfig } = useUploadThing("imageUploader", {
     onClientUploadComplete: () => {
       // alert("uploaded successfully!");
     },
@@ -125,49 +131,64 @@ const page = () => {
               type="text"
               className="h-full w-full placeholder:text-sm px-3"
               placeholder="ค้นหาหนังสือ...."
+              onChange={(e) => setSearchText(e.target.value)}
             />
           </div>
-          <div
+          <button
             onClick={() => {
               setIsOpen((prev) => !prev);
             }}
-            className="bg-black text-white h-10 w-10 flex justify-center items-center text-2xl font-bold pb-1.5 rounded-lg cursor-pointer"
+            className="bg-black text-white h-10 w-10 flex justify-center items-center text-2xl font-bold rounded-lg cursor-pointer"
           >
-            +
-          </div>
+            <Plus />
+          </button>
         </div>
-        <table className="w-full ">
+        <table className="w-full mt-4">
           <thead>
             <tr>
-              <th>ชื่อหนังสือ</th>
-              <th>หมวดหมู่</th>
-              <th className="">จำนวน</th>
+              <th
+                className={`bg-gray-200 rounded-l-2xl py-2 px-2 text-left pl-8`}
+              >
+                ชื่อหนังสือ
+              </th>
+              <th className={`bg-gray-200 py-2`}>หมวดหมู่</th>
+              <th className={`bg-gray-200 rounded-r-2xl py-2`}>จำนวน</th>
             </tr>
           </thead>
           <tbody className="text-center">
-            {bookList.map((book, index) => {
-              return (
-                <tr key={index}>
-                  <td className="py-2">
-                    <div className="flex gap-4 items-center">
-                      <img src={book.image} alt="bookImage" width={66} height={66} className="rounded-lg drop-shadow-md bg-white"/>
-                      <div className="text-left">
-                        <div className=" font-bold leading-3.5">
-                    {book.name}
+            {bookList
+              .filter((book) =>
+                searchText === "" ? true : book.name.startsWith(searchText)
+              )
+              .map((book, index) => {
+                return (
+                  <tr key={index}>
+                    <td className="py-2">
+                      <div className="flex gap-4 items-center">
+                        <img
+                          src={book.image}
+                          alt="bookImage"
+                          width={66}
+                          height={66}
+                          className="rounded-lg drop-shadow-md bg-white"
+                        />
+                        <div className="text-left">
+                          <div className="font-bold text-lg text-black/85">
+                            {book.name}
+                          </div>
+                          <Link href={`/book/${book.id}`}>
+                            <div className="text-gray-500 underline text-sm cursor-pointer">
+                              รายละเอียด
+                            </div>
+                          </Link>
                         </div>
-                        <Link href={`/book/${book.id}`}>
-                        <div className="text-gray-400 underline text-[10px] cursor-pointer">
-                          รายละเอียด
-                        </div>
-                        </Link>
                       </div>
-                    </div>
                     </td>
-                  <td className="py-2  font-bold">{book.category}</td>
-                  <td className="py-2  font-bold">{book.copies.length}</td>
-                </tr>
-              );
-            })}
+                    <td className="py-2  font-bold">{book.category}</td>
+                    <td className="py-2  font-bold">{book.copies.length}</td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
@@ -179,22 +200,11 @@ const page = () => {
           </DialogHeader>
           <div className=" flex gap-4">
             <div
-              onClick={() => {
-                // inputRef.current?.click();
-              }}
               className="flex justify-center items-center pb-6 w-[170px] bg-[#e6e6ea] hover:bg-[#C2C2CC] h-[258px] rounded-2xl cursor-pointer"
               {...getRootProps()}
             >
               <input
                 type="file"
-                // className="hidden"
-                // ref={inputRef}
-                // onChange={(e) => {
-                //   if (e.target.files && e.target.files?.length > 0) {
-                //     setFile(e.target.files[0]);
-                //     setFilePreview(URL.createObjectURL(e.target.files[0]));
-                //   }
-                // }}
                 {...getInputProps()}
                 multiple={false}
               />
@@ -241,4 +251,4 @@ const page = () => {
   );
 };
 
-export default page;
+export default BookPage;

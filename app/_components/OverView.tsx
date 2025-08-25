@@ -1,11 +1,28 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import { Prisma } from "@/generated/prisma";
 import { cn } from "@/lib/utils";
 import dayjs from "dayjs";
-import { AlertTriangle, ArrowDownUp, Check, Clock, Filter, Search } from "lucide-react";
-import React, { useState } from "react";
+import {
+  AlertTriangle,
+  ArrowDownUp,
+  Check,
+  Clock,
+  Filter,
+  Search,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
 import DialogBorrowReturn from "./DialogAppBorrow";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import _ from 'lodash'
 
 interface OverViewProps {
   borrowTransactions?: Prisma.BorrowTransactionGetPayload<{
@@ -14,11 +31,8 @@ interface OverViewProps {
   className?: string;
 }
 
-const OverView = ({ borrowTransactions, className }: OverViewProps) => {
-  const [isOpen, setIsOpen] = useState(false)
-
-  const getStatus = (
-    borrowTransaction: Prisma.BorrowTransactionGetPayload<{}>
+const getStatus = (
+    borrowTransaction: Prisma.BorrowTransactionGetPayload<object>
   ) => {
     if (
       borrowTransaction.returnedAt &&
@@ -36,8 +50,54 @@ const OverView = ({ borrowTransactions, className }: OverViewProps) => {
     return "returned";
   };
 
+const OverView = ({ borrowTransactions, className }: OverViewProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [cloneBorrowTransaction, setCloneBorrowTransaction] = useState<
+    Prisma.BorrowTransactionGetPayload<{
+      include: { user: true; bookCopy: { include: { book: true } } };
+    }>[]
+  >([]);
+
+  useEffect(() => {
+    if(borrowTransactions){
+      let clone = _.cloneDeep(borrowTransactions)
+      const isReturnLate = searchParams.get(`isReturnLate`) === `true`
+      const isLate = searchParams.get(`isLate`) === `true`
+      const isWaiting = searchParams.get(`isWaiting`) === `true`
+      const isReturned = searchParams.get(`isReturned`) === `true`
+      if(isReturnLate || isLate || isWaiting || isReturned){
+        clone = clone.filter((borrowTs) => {
+          const filterReturnLate = isReturnLate ? getStatus(borrowTs) === "returnLate" : false
+          const filterLate = isLate ? getStatus(borrowTs) === "late" : false
+          const filterWaiting = isWaiting ? getStatus(borrowTs) === "waiting" : false
+          const filterReturned = isReturned ? getStatus(borrowTs) === "returned" : false
+          return filterReturnLate || filterLate || filterWaiting || filterReturned
+        })
+      }
+      
+      setCloneBorrowTransaction(clone)
+    }
+  }, [searchParams, borrowTransactions])
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      const params = new URLSearchParams(searchParams.toString());
+      if (!searchText) {
+        params.delete("search");
+      } else {
+        params.set("search", searchText);
+      }
+      router.replace(`/?${params.toString()}`);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce); // ล้าง timeout ถ้าพิมพ์ต่อ
+  }, [searchText, router, searchParams]);
+
   const renderStatus = (
-    borrowTransaction: Prisma.BorrowTransactionGetPayload<{}>
+    borrowTransaction: Prisma.BorrowTransactionGetPayload<object>
   ) => {
     let icon = <Check size={14} />;
     let bgColor = "bg-green-100";
@@ -80,15 +140,22 @@ const OverView = ({ borrowTransactions, className }: OverViewProps) => {
   };
 
   const handleOnOpenChange = (open: boolean) => {
-    setIsOpen(open)
-  }
+    setIsOpen(open);
+  };
+
+  const handleOnChangeFilter = (checked: boolean, key: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (!checked) {
+      params.delete(key);
+    } else {
+      params.set(key, "true");
+    }
+    router.push(`/?${params.toString()}`);
+  };
 
   return (
-    <div className={cn(``, className ?? '')}>
-      <DialogBorrowReturn
-        open={isOpen}
-        onOpenChange={handleOnOpenChange}
-      />
+    <div className={cn(``, className ?? "")}>
+      <DialogBorrowReturn open={isOpen} onOpenChange={handleOnOpenChange} />
       <div className={`flex gap-4 items-center`}>
         <div
           className={`bg-input h-10 rounded-lg relative flex items-center gap-3 pl-3 flex-1`}
@@ -98,23 +165,78 @@ const OverView = ({ borrowTransactions, className }: OverViewProps) => {
             type="text"
             className={`h-10 flex-1 focus:outline-none`}
             placeholder="ค้นหาชื่อหนังสือ, ผู้ยืม"
+            onChange={(e) => setSearchText(e.target.value)}
           />
         </div>
         <div className={`flex gap-2`}>
-          <Button className={`min-h-10`}>
-            <Filter />
-            <div>
-              กรอง
-            </div>
-          </Button>
-          <Button
-            className={`min-h-10`}
-            onClick={() => setIsOpen(true)}
-          >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className={`min-h-10`}>
+                <Filter />
+                <div>กรอง</div>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel>สถานะ</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem
+                checked={searchParams.get(`isReturnLate`) === `true`}
+                onCheckedChange={(checked) => {
+                  handleOnChangeFilter(checked, "isReturnLate");
+                }}
+              >
+                <div
+                  className={`size-6 rounded-full flex justify-center items-center bg-amber-400`}
+                >
+                  <Check className={`text-white size-3.5`} />
+                </div>
+                คืนช้า
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={searchParams.get(`isLate`) === `true`}
+                onCheckedChange={(checked) => {
+                  handleOnChangeFilter(checked, "isLate");
+                }}
+              >
+                <div
+                  className={`size-6 rounded-full flex justify-center items-center bg-red-400`}
+                >
+                  <AlertTriangle className={`text-white size-3.5`} />
+                </div>
+                เลยกำหนด
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={searchParams.get(`isWaiting`) === `true`}
+                onCheckedChange={(checked) => {
+                  handleOnChangeFilter(checked, "isWaiting");
+                }}
+              >
+                <div
+                  className={`size-6 rounded-full flex justify-center items-center bg-blue-400`}
+                >
+                  <Clock className={`text-white size-3.5`} />
+                </div>
+                รอ
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={searchParams.get(`isReturned`) === `true`}
+                onCheckedChange={(checked) => {
+                  handleOnChangeFilter(checked, "isReturned");
+                }}
+              >
+                <div
+                  className={`size-6 rounded-full flex justify-center items-center bg-green-500`}
+                >
+                  <Clock className={`text-white size-3.5`} />
+                </div>
+                คืนแล้ว
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button className={`min-h-10`} onClick={() => setIsOpen(true)}>
             <ArrowDownUp />
-            <div>
-              ยืม-คืน
-            </div>
+            <div>ยืม-คืน</div>
           </Button>
         </div>
       </div>
@@ -133,7 +255,7 @@ const OverView = ({ borrowTransactions, className }: OverViewProps) => {
           </tr>
         </thead>
         <tbody className={`text-center`}>
-          {borrowTransactions?.map((borrowTransaction, index) => {
+          {cloneBorrowTransaction?.map((borrowTransaction, index) => {
             return (
               <tr key={`borrow${index}`}>
                 <td>{borrowTransaction.id}</td>

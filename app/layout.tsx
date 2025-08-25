@@ -2,12 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
-import Link from "next/link";
 import { Toaster } from 'sonner'
-import { ArrowUpDown, Book, User } from "lucide-react";
 import { auth } from "@/auth";
-import { cn } from "@/lib/utils";
-import { headers } from "next/headers";
 import MenuSide from "./_components/MenuSide";
 
 const geistSans = Geist({
@@ -31,8 +27,6 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth()
-  const headersList = await headers();
-  const pathname = headersList.get("x-invoke-path") || "/";
   return (
     <html lang="en" suppressHydrationWarning>
       <body
